@@ -1,0 +1,13 @@
+{
+  "name": "get-string-colors",
+  "version": "0.0.1",
+  "description": "Get colors of a string using Google images and get-image-colors",
+  "main": "index.js",
+  "repository": "https://github.com/tommilligan/get-string-colors",
+  "author": "Tom Milligan",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "get-image-colors": "^1.8.1",
+    "googleapis": "^19.0.0"
+  }
+}
