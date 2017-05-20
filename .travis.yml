@@ -7,7 +7,7 @@ script:
   - npm run coverage
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - bash <(curl -sSL https://download.sourceclear.com/ci.sh)
+  - DEBUG=1 bash <(curl -sSL https://download.sourceclear.com/ci.sh)
 deploy:
   - provider: npm
     email: "code@tommilligan.net"
