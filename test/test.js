@@ -7,7 +7,15 @@ describe('Always', function() {
     it('1 should equal 1', function() {
       assert.equal(1, 1);
     });
-    it('always_true should return true', function() {
+  });
+});
+
+describe('Module exports', function() {
+  describe('Default export', function() {
+    it('should be of type function', function() {
+      assert.isType(getStringColors, Function);
+    });
+    it('should return a promise', function() {
       assert.isTrue(getStringColors())
     });
   });
