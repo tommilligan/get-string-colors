@@ -8,12 +8,18 @@
   "license": "Apache-2.0",
   "dependencies": {
     "get-image-colors": "^1.8.1",
-    "googleapis": "^19.0.0"
+    "google-images": "^2.1.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "eslint": "^3.19.0",
+    "eslint-plugin-mocha": "^4.9.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.4.1"
+    "mocha": "^3.4.1",
+    "mocha-eslint": "^3.0.1"
   },
   "scripts": {
     "test": "mocha",
