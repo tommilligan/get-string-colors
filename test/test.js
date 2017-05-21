@@ -7,31 +7,48 @@ const expect = chai.expect;
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 
-const getStringColors = require("../src/index");
+const GetStringColors = require("../src/index");
 
 require("dotenv-safe").load({
     path: "./test/.env",
     sample: "./test/.env.example"
 });
-
-// Begin testing
 const testDataDir = path.join(__dirname, "data");
 
-describe("Always", function () {
-    describe("pass", function () {
-        it("1 should equal 1", function () {
-            assert.equal(1, 1);
-        });
+// Begin testing
+
+describe("The GetStringColors constructor (default export)", function () {
+    it("should be of type function", function () {
+        assert.typeOf(GetStringColors, "function");
+    });
+    it("should error if no parameters", function() {
+        expect(function () {
+            new GetStringColors(undefined, undefined);
+        }).to.throw();
+    });
+    it("should error if no Google CSE ID", function() {
+        expect(function () {
+            new GetStringColors(undefined, process.env.GOOGLE_API_KEY);
+        }).to.throw();
+    });
+    it("should error if no Google API Key", function() {
+        expect(function () {
+            new GetStringColors(process.env.GOOGLE_CSE_ID, undefined);
+        }).to.throw();
+    });
+    it("should not error with Google CSE ID & API Key", function() {
+        expect(function () {
+            new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
+        }).to.not.throw();
     });
 });
 
-describe("Module exports", function () {
-    describe("Default export", function () {
-        it("should be of type function", function () {
-            assert.typeOf(getStringColors, "function");
-        });
+describe("Using a getStringColors instance", function () {
+    beforeEach(function(){
+        new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
     });
 });
+
 
 describe("Color from JPEG bufffer", function () {
     describe("Should return a chroma color object", function () {
@@ -46,3 +63,4 @@ describe("Color from JPEG bufffer", function () {
         });
     });
 });
+
