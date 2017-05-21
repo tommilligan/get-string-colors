@@ -5,7 +5,7 @@ var lint = require("mocha-eslint");
 // matches a glob pattern 
 var paths = [
     "src/**/*.js",
-    "tests/**/*.js",
+    "test/**/*.js",
 ];
  
 var options = {

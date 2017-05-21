@@ -21,7 +21,7 @@ module.exports = {
             "error",
             "double"
         ],
-        "allowTemplateLiterals": true,
+        "allowTemplateLiterals": 0,
         "semi": [
             "error",
             "always"

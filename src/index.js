@@ -1,6 +1,6 @@
 const getColors = require("get-image-colors");
 const GoogleImages = require("google-images");
-
+const got = require("got");
 
 class GetStringColors {
     constructor(googleCseId, googleApiKey) {
