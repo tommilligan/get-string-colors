@@ -9,7 +9,10 @@ chai.use(chaiAsPromised);
 
 const getStringColors = require("../src/index");
 
-//require("dotenv-safe").load();
+require("dotenv-safe").load({
+    path: "./test/.env",
+    sample: "./test/.env.example"
+});
 
 // Begin testing
 const testDataDir = path.join(__dirname, "data");
