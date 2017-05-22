@@ -27,10 +27,10 @@ class GetStringColors {
         });
     }
 
-    requestImageAsBuffer (url) {
+    requestImageUrlAsBuffer (url) {
         debug("Requesting image URLs as buffer");
         return new Promise((resolve, reject) => {
-            got(url)
+            got(url, {encoding: null})
                 .then(response => {
                     resolve(response.body);
                 })
@@ -42,14 +42,24 @@ class GetStringColors {
 
     getColorsFromJpgBuffer (buffer) {
         debug("Getting colors from JPEG buffer");
-        return getColors(buffer, "image/jpg");
+        return new Promise((resolve, reject) => {
+            getColors(buffer, "image/jpg")
+                .then(colors => {
+                    debug("Got colors %O", colors);
+                    resolve(colors);
+                }).catch(error => {
+                    reject(error);
+                });
+        });
     }
 
     getStringColors (query) {
         debug("Getting string colors");
         return this.requestJpgImageUrls(query)
             .then(imageUrls => {
-                return this.requestImageUrlAsBuffer(imageUrls[0]);
+                const imageUrl = imageUrls[0];
+                debug("Using image URL %s", imageUrl);
+                return this.requestImageUrlAsBuffer(imageUrl);
             }).then(buffer => {
                 return this.getColorsFromJpgBuffer(buffer);
             });
