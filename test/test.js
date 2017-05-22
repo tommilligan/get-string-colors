@@ -82,6 +82,9 @@ describe("Using a getStringColors instance", function () {
                 expect(promise).to.eventually.have.length.above(0)
             ]);
         });
+        it("known bad url should reject", function () {
+            return expect(getStringColors.requestImageUrlAsBuffer("http://tommilligan.github.io/does-not-exist/image.jpg")).to.be.rejected;
+        });
     });
     describe("Using getColorsFromJpgBuffer", function () {
         var getStringColors = null;
