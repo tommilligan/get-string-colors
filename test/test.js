@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 
 const chai = require("chai");
-const assert = chai.assert;
 const expect = chai.expect;
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
@@ -19,7 +18,7 @@ const testDataDir = path.join(__dirname, "data");
 
 describe("The GetStringColors constructor (default export)", function () {
     it("should be of type function", function () {
-        assert.typeOf(GetStringColors, "function");
+        expect(GetStringColors).to.be.a("function");
     });
     it("should error if no parameters", function() {
         expect(function () {
@@ -44,22 +43,63 @@ describe("The GetStringColors constructor (default export)", function () {
 });
 
 describe("Using a getStringColors instance", function () {
-    beforeEach(function(){
-        new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
-    });
-});
-
-
-describe("Color from JPEG bufffer", function () {
-    describe("Should return a chroma color object", function () {
-        var buffer = fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg"));
-        buffer.toString("base64");
-        it("resolves as promised", function() {
-            return expect(Promise.resolve("woof")).to.eventually.equal("woof");
+    /*
+    describe("Using requestJpgImageUrls", function () {
+        var getStringColors = null;
+        beforeEach(function() {
+            getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
         });
-
-        it("rejects as promised", function() {
-            return expect(Promise.reject("caw")).to.be.rejectedWith("caw");
+        it("known query should get an array of strings", function () {
+            const promise = getStringColors.requestJpgImageUrls("sun");
+            return Promise.all([
+                expect(promise).to.eventually.be.an("array"),
+                expect(promise).to.eventually.satisfy(array => {
+                    return array.every(item => {
+                        return expect(item).to.be.a("string");
+                    });
+                }),
+                expect(promise).to.eventually.have.length.above(0)
+            ]);
+        });
+        it("unknown query should get an array of length 0", function () {
+            const promise = getStringColors.requestJpgImageUrls("9oTvo2EiXdtMLfBPJrSGG6u3wjH1OBasa1WRvnkyxQnBDylw2FTL6qI2cBBaXQ68");
+            return Promise.all([
+                expect(promise).to.eventually.be.an("array"),
+                expect(promise).to.eventually.be.empty
+            ]);
+        });
+    });
+    */
+    describe("Using requestImageAsBuffer", function () {
+        var getStringColors = null;
+        beforeEach(function() {
+            getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
+        });
+        it("known url should get a buffer", function () {
+            const promise = getStringColors.requestImageAsBuffer("https://upload.wikimedia.org/wikipedia/commons/d/d6/Wikipedia-logo-v2-en.png");
+            return Promise.all([
+                expect(promise).to.eventually.be.a("string"),
+                expect(promise).to.eventually.have.length.above(0)
+            ]);
+        });
+    });
+    describe("Using getColorsFromJpgBuffer", function () {
+        var getStringColors = null;
+        beforeEach(function() {
+            getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
+        });
+        it("should return a chroma color object for a JPEG buffer", function () {
+            const buffer = fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg"));
+            const promise = getStringColors.getColorsFromJpgBuffer(buffer);
+            return Promise.all([
+                expect(promise).to.eventually.be.ok,
+            ]);
+        });
+        it("should throw an error for a non-JPEG buffer", function () {
+            return expect(getStringColors.getColorsFromJpgBuffer(new Buffer("I2yXOkaDg6GqVGIbiN32dPo8apht7ZyABFdpNzJbxSTWQq6YGwbtdpso4zMhiss2"))).to.be.rejectedWith("SOI not found");
+        });
+        it("should throw an error for an empty buffer", function () {
+            return expect(getStringColors.getColorsFromJpgBuffer(new Buffer(""))).to.be.rejectedWith("SOI not found");
         });
     });
 });

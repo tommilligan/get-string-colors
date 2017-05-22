@@ -2,60 +2,57 @@ const getColors = require("get-image-colors");
 const GoogleImages = require("google-images");
 const got = require("got");
 
+const debug = require("debug")("get-string-colors");
+
 class GetStringColors {
     constructor(googleCseId, googleApiKey) {
+        debug("Constructing a new GetStringColors instance");
         this.googleImages = new GoogleImages(googleCseId, googleApiKey);
     }
 
     requestJpgImageUrls (query, options={}) {
+        debug("Requesting JPEG image URLs for: %s", query);
         options = Object.assign({size: "medium"}, options);
-        this.googleImages.search(query, options)
-            .then(images => {
-                /*
-                [{
-                    "url": "http://steveangello.com/boss.jpg",
-                    "type": "image/jpeg",
-                    "width": 1024,
-                    "height": 768,
-                    "size": 102451,
-                    "thumbnail": {
-                        "url": "http://steveangello.com/thumbnail.jpg",
-                        "width": 512,
-                        "height": 512
-                    }
-                }]
-                */
-                return images[0].url;
+        debug("Request options: %o", options);
+        return new Promise((resolve) => {
+            const search = this.googleImages.search(query, options);
+            search.then(images => {
+                debug("Image results: %d", images.length);
+                const jpgImages = images.filter(image => {
+                    return image.type === "image/jpeg";
+                });
+                debug("JPEG image results: %d", jpgImages.length);
+                resolve(jpgImages.map(image => image.url));
             });
+        });
     }
 
     requestImageAsBuffer (url) {
-        got(url)
-            .then(response => {
-                return response.body;
-            })
-            .catch(error => {
-                throw {name: error.response.body, message: `Failed requesting ${url} to buffer`};
-            });
+        debug("Requesting image URLs as buffer");
+        return new Promise((resolve, reject) => {
+            got(url)
+                .then(response => {
+                    resolve(response.body);
+                })
+                .catch(error => {
+                    reject({name: error.response.body, message: `Failed requesting ${url} to buffer`});
+                });
+        });
     }
 
     getColorsFromJpgBuffer (buffer) {
+        debug("Getting colors from JPEG buffer");
         return getColors(buffer, "image/jpg");
     }
 
     getStringColors (query) {
-        new Promise((resolve, reject) => {
-            // Get jpg image urls matching string
-            const imageUrls = this.requestJpgImageUrls(query);
-            // Download first image image into buffer
-            const buffer = this.requestImageUrlAsBuffer(imageUrls[0]);
-            // Get colors from image buffer
-            const colors = this.getColorsFromJpgBuffer(buffer);
-            // Return colors to fulfil promise
-            resolve(colors);
-            reject();
-            throw {name: "getStringColorsError", message: "General error"};
-        });
+        debug("Getting string colors");
+        return this.requestJpgImageUrls(query)
+            .then(imageUrls => {
+                return this.requestImageUrlAsBuffer(imageUrls[0]);
+            }).then(buffer => {
+                return this.getColorsFromJpgBuffer(buffer);
+            });
     }
 }
 
