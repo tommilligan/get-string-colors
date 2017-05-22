@@ -43,7 +43,6 @@ describe("The GetStringColors constructor (default export)", function () {
 });
 
 describe("Using a getStringColors instance", function () {
-    /*
     describe("Using requestJpgImageUrls", function () {
         var getStringColors = null;
         beforeEach(function() {
@@ -69,7 +68,6 @@ describe("Using a getStringColors instance", function () {
             ]);
         });
     });
-    */
     describe("Using requestImageUrlAsBuffer", function () {
         var getStringColors = null;
         beforeEach(function() {
