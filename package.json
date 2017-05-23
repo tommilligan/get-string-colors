@@ -7,6 +7,7 @@
   "author": "Tom Milligan",
   "license": "Apache-2.0",
   "dependencies": {
+    "debug": "^2.6.8",
     "get-image-colors": "^1.8.1",
     "google-images": "^2.1.0",
     "got": "^6.7.1"
@@ -14,13 +15,13 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
-    "debug": "^2.6.8",
     "dotenv-safe": "^4.0.4",
     "eslint": "^3.19.0",
     "eslint-plugin-mocha": "^4.9.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.4.1",
-    "mocha-eslint": "^3.0.1"
+    "mocha-eslint": "^3.0.1",
+    "sinon": "^2.3.1"
   },
   "scripts": {
     "test": "mocha",
