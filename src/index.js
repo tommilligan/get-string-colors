@@ -1,12 +1,12 @@
-const getColors = require("get-image-colors");
-const GoogleImages = require("google-images");
-const got = require("got");
+let getColors = require("get-image-colors");
+let GoogleImages = require("google-images");
+let got = require("got");
 
-const debug = require("debug")("get-string-colors");
+let debug = require("debug")("get-string-colors");
 
 class GetStringColors {
     constructor(googleCseId, googleApiKey) {
-        debug("Constructing a new GetStringColors instance");
+        debug("letructing a new GetStringColors instance");
         this.googleImages = new GoogleImages(googleCseId, googleApiKey);
     }
 
@@ -15,10 +15,10 @@ class GetStringColors {
         options = Object.assign({size: "medium"}, options);
         debug("Request options: %o", options);
         return new Promise((resolve) => {
-            const search = this.googleImages.search(query, options);
+            let search = this.googleImages.search(query, options);
             search.then(images => {
                 debug("Image results: %d", images.length);
-                const jpgImages = images.filter(image => {
+                let jpgImages = images.filter(image => {
                     return image.type === "image/jpeg";
                 });
                 debug("JPEG image results: %d", jpgImages.length);
@@ -57,7 +57,7 @@ class GetStringColors {
         debug("Getting string colors");
         return this.requestJpgImageUrls(query)
             .then(imageUrls => {
-                const imageUrl = imageUrls[0];
+                let imageUrl = imageUrls[0];
                 debug("Using image URL %s", imageUrl);
                 return this.requestImageUrlAsBuffer(imageUrl);
             }).then(buffer => {
