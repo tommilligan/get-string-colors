@@ -4,66 +4,59 @@ let got = require("got");
 
 let debug = require("debug")("get-string-colors");
 
-class GetStringColors {
-    constructor(googleCseId, googleApiKey) {
-        debug("letructing a new GetStringColors instance");
-        this.googleImages = new GoogleImages(googleCseId, googleApiKey);
-    }
+// Sync functions
+let filterResultsByImageType = (results, type) => {
+    debug("Filtering %d image results by type: %s", [results, type]);
+    return results.filter(image => {
+        return image.type === "image/jpeg";
+    });
+};
 
-    requestJpgImageUrls (query, options={}) {
-        debug("Requesting JPEG image URLs for: %s", query);
-        options = Object.assign({size: "medium"}, options);
-        debug("Request options: %o", options);
-        return new Promise((resolve) => {
-            let search = this.googleImages.search(query, options);
-            search.then(images => {
-                debug("Image results: %d", images.length);
-                let jpgImages = images.filter(image => {
-                    return image.type === "image/jpeg";
-                });
-                debug("JPEG image results: %d", jpgImages.length);
-                resolve(jpgImages.map(image => image.url));
+// Async functions (return promises)
+let requestImageSearch = (googleImages, query, options={}) => {
+    debug("Searching images for: %s", query);
+    options = Object.assign({size: "medium"}, options);
+    debug("Search options: %o", options);
+    return googleImages.search(query, options);
+};
+
+let requestImageUrlAsBuffer = (url) => {
+    debug("Requesting image URL %s as buffer", url);
+    return new Promise((resolve, reject) => {
+        got(url, {encoding: null})
+            .then(response => {
+                resolve(response.body);
+            })
+            .catch(error => {
+                reject({name: error.response.body, message: `Failed requesting ${url} to buffer, ${error.response.body}`});
             });
-        });
-    }
+    });
+};
 
-    requestImageUrlAsBuffer (url) {
-        debug("Requesting image URLs as buffer");
-        return new Promise((resolve, reject) => {
-            got(url, {encoding: null})
-                .then(response => {
-                    resolve(response.body);
-                })
-                .catch(error => {
-                    reject({name: error.response.body, message: `Failed requesting ${url} to buffer`});
-                });
-        });
-    }
+let getColorsFromBuffer = (buffer, type) => {
+    debug("Getting colors from buffer type: %s", type);
+    getColors(buffer, "image/jpeg");
+};
 
-    getColorsFromJpgBuffer (buffer) {
-        debug("Getting colors from JPEG buffer");
-        return new Promise((resolve, reject) => {
-            getColors(buffer, "image/jpg")
-                .then(colors => {
-                    debug("Got colors %O", colors);
-                    resolve(colors);
-                }).catch(error => {
-                    reject(error);
-                });
-        });
-    }
+// Factory function: returns an async function (promised result)
+let GetStringColors = (googleCseId, googleApiKey) => {
+    debug("Manufacturing a new GetStringColors instance");
+    let googleImages = new GoogleImages(googleCseId, googleApiKey);
 
-    getStringColors (query) {
+    return (query, type="image/jpeg") => {
         debug("Getting string colors");
-        return this.requestJpgImageUrls(query)
-            .then(imageUrls => {
-                let imageUrl = imageUrls[0];
-                debug("Using image URL %s", imageUrl);
-                return this.requestImageUrlAsBuffer(imageUrl);
-            }).then(buffer => {
-                return this.getColorsFromJpgBuffer(buffer);
+        return requestImageSearch(googleImages, query)
+            .then(imageSearchResults => {
+                return filterResultsByImageType(imageSearchResults, type);
+            })
+            .then(filteredResults => {
+                let imageUrl = filteredResults[0].url;
+                return requestImageUrlAsBuffer(imageUrl);
+            })
+            .then(buffer => {
+                return getColorsFromBuffer(buffer, type);
             });
-    }
-}
+    };
+};
 
 module.exports = GetStringColors;
