@@ -8,7 +8,7 @@ let debug = require("debug")("get-string-colors");
 let filterResultsByImageType = (results, type) => {
     debug("Filtering %d image results by type: %s", [results, type]);
     return results.filter(image => {
-        return image.type === "image/jpeg";
+        return image.type === type;
     });
 };
 

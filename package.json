@@ -21,10 +21,14 @@
     "istanbul": "^0.4.5",
     "mocha": "^3.4.1",
     "mocha-eslint": "^3.0.1",
-    "sinon": "^2.3.1"
+    "rewire": "^2.5.2",
+    "sinon": "^2.3.1",
+    "sinon-chai": "^2.10.0"
   },
   "scripts": {
     "test": "mocha",
+    "unit": "mocha test/**/unit_*.js",
+    "integrate": "mocha test/**/integrate_*.js",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha"
   }
 }
