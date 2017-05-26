@@ -47,7 +47,7 @@ var testData = {
         }
     ],
     "imageBufferJpeg": fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg")),
-    "googleImages": new GoogleImages("CSE_ID", "API_KEY")
+    "googleImages": new GoogleImages("GOOGLE_CSE_ID", "GOOGLE_API_KEY")
 };
 
 
@@ -64,17 +64,17 @@ describe("The GetStringColors factory function (default export)", function () {
     });
     it("should error if no Google CSE ID", function() {
         expect(function () {
-            GetStringColors(undefined, process.env.GOOGLE_API_KEY);
+            GetStringColors(undefined, "GOOGLE_API_KEY");
         }).to.throw();
     });
     it("should error if no Google API Key", function() {
         expect(function () {
-            GetStringColors(process.env.GOOGLE_CSE_ID, undefined);
+            GetStringColors("GOOGLE_CSE_ID", undefined);
         }).to.throw();
     });
     it("should return a function if okay", function() {
         expect(function () {
-            var getStringColors = GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
+            var getStringColors = GetStringColors("GOOGLE_CSE_ID", "GOOGLE_API_KEY");
             expect(getStringColors).to.be.a("function");
         }).to.not.throw();
     });
@@ -115,7 +115,7 @@ describe("Module private functions", function () {
         it("if no results should throw error", function () {
             expect(function () {
                 private_function(data, "holy/grail");
-            }).to.throw();
+            }).to.throw("DataError");
         });
     });
 });

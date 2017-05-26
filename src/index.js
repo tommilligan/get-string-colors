@@ -22,8 +22,9 @@ let filterResultsByImageType = (results, type) => {
 let processResultsToUrl = (results, type) => {
     debug("Picking one %s image URL from %d results", [type, results.length]);
     var filteredResults = filterResultsByImageType(results, type);
-    var imageUrl = filteredResults[0].url;
-    if (imageUrl === undefined) {
+    try {
+        var imageUrl = filteredResults[0].url;
+    } catch (error) {
         throw new DataError("No suitable images were found for this query");
     }
     return imageUrl;
@@ -46,7 +47,7 @@ let requestImageUrlAsBuffer = (url) => {
                 resolve(response.body);
             })
             .catch(error => {
-                reject({name: error.response.body, message: `Failed requesting ${url} to buffer, ${error.response.body}`});
+                reject(error);
             });
     });
 };
