@@ -9,14 +9,12 @@ var rewire = require("rewire");
 var sinon = require("sinon");
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
+var sinonStubPromise = require("sinon-stub-promise");
+sinonStubPromise(sinon);
 
-var googleImages = require("google-images");
+var GoogleImages = require("google-images");
 var GetStringColors = rewire("../src/index");
 
-require("dotenv-safe").load({
-    path: "./test/.env",
-    sample: "./test/.env.example"
-});
 var testDataDir = path.join(__dirname, "data");
 
 // Sample data
@@ -48,7 +46,8 @@ var testData = {
             }
         }
     ],
-    "imageBufferJpeg": fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg"))
+    "imageBufferJpeg": fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg")),
+    "googleImages": new GoogleImages("CSE_ID", "API_KEY")
 };
 
 
@@ -120,96 +119,26 @@ describe("Module private functions", function () {
         });
     });
 });
-/*
+
 describe("Agnostic wrappers for external dependencies", function () {
-    describe("Requesting an image search", function () {
+    describe("requestImageSearch", function () {
         var private_function = null;
         var stub = null;
+        var googleImages = testData.googleImages;
         beforeEach(function() {
             private_function = GetStringColors.__get__("requestImageSearch");
-            stub = sinon.stub(googleImages(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY), "search");
+            stub = sinon.stub(googleImages, "search").callsFake(() => { return testData.imageSearchResults; });
         });
-        it("should reach back to dependency", function () {
-            private_function("spam");
-            expect(stub).to.be.called;
+        it("should use provided google-images search method", function () {
+            private_function(googleImages, "spam");
+            expect(stub).to.be.calledWith("spam");
+        });
+        it("should return search results unchanged", function () {
+            var results = private_function(googleImages, "spam");
+            expect(results).to.be.equal(testData.imageSearchResults);
         });
         afterEach(function() {
-            stub.resetBehaviour();
-        });
-    });
-    describe("Reuesting an image search", function () {
-        var stub = null;
-        before(function() {
-            stub = sinon.stub(googleImages, "Client")
-                .returns([{
-                    "url": "http://foo.bar/baz.jpg",
-                    "type": "image/jpeg",
-                    "width": 1024,
-                    "height": 768,
-                    "size": 102451,
-                    "thumbnail": {
-                        "url": "http://foo.bar/thumbnail.jpg",
-                        "width": 512,
-                        "height": 512
-                    }
-                }]);
-        });
-        it("known url should get a buffer", function () {
-            var promise = getStringColors.requestImageUrlAsBuffer("https://upload.wikimedia.org/wikipedia/commons/d/d6/Wikipedia-logo-v2-en.png");
-            return Promise.all([
-                expect(promise).to.eventually.be.instanceOf(Buffer),
-                expect(promise).to.eventually.have.length.above(0)
-            ]);
-        });
-        it("known bad url should reject", function () {
-            return expect(getStringColors.requestImageUrlAsBuffer("http://tommilligan.github.io/does-not-exist/image.jpg")).to.be.rejected;
-        });
-        after(function() {
-            stub.resetBehaviour();
-        });
-    });
-    describe("Using getColorsFromJpgBuffer", function () {
-        var getStringColors = null;
-        beforeEach(function() {
-            getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
-        });
-        it("should return a chroma color object for a JPEG buffer", function () {
-            var buffer = 
-            var promise = getStringColors.getColorsFromJpgBuffer(buffer);
-            return Promise.all([
-                expect(promise).to.eventually.be.an("array"),
-                expect(promise).to.eventually.satisfy(array => {
-                    return array.every(item => {
-                        return expect(item).to.be.an("object");
-                    });
-                }),
-                expect(promise).to.eventually.have.lengthOf(5)
-            ]);
-        });
-        it("should throw an error for a non-JPEG buffer", function () {
-            return expect(getStringColors.getColorsFromJpgBuffer(new Buffer("I2yXOkaDg6GqVGIbiN32dPo8apht7ZyABFdpNzJbxSTWQq6YGwbtdpso4zMhiss2"))).to.be.rejectedWith("SOI not found");
-        });
-        it("should throw an error for an empty buffer", function () {
-            return expect(getStringColors.getColorsFromJpgBuffer(new Buffer(""))).to.be.rejectedWith("SOI not found");
-        });
-    });
-    describe("Using getStringColors", function () {
-        var getStringColors = null;
-        beforeEach(function() {
-            getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
-        });
-        it("should return a chroma color object from a valid search string", function () {
-            var promise = getStringColors.getStringColors("dog");
-            return Promise.all([
-                expect(promise).to.eventually.be.an("array"),
-                expect(promise).to.eventually.satisfy(array => {
-                    return array.every(item => {
-                        return expect(item).to.be.an("object");
-                    });
-                }),
-                expect(promise).to.eventually.have.lengthOf(5)
-            ]);
+            stub.restore();
         });
     });
 });
-*/
