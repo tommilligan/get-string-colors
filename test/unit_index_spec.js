@@ -19,6 +19,39 @@ require("dotenv-safe").load({
 });
 var testDataDir = path.join(__dirname, "data");
 
+// Sample data
+
+var testData = {
+    "imageSearchResults": [
+        {
+            "url": "http://foo.bar/baz.jpg",
+            "type": "image/jpeg",
+            "width": 1024,
+            "height": 768,
+            "size": 102451,
+            "thumbnail": {
+                "url": "http://foo.bar/thumbnail.jpg",
+                "width": 512,
+                "height": 512
+            }
+        },
+        {
+            "url": "http://green.eggs/ham.jpg",
+            "type": "image/png",
+            "width": 1024,
+            "height": 768,
+            "size": 102451,
+            "thumbnail": {
+                "url": "http://green.eggs/thumbnail.jpg",
+                "width": 512,
+                "height": 512
+            }
+        }
+    ],
+    "imageBufferJpeg": fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg"))
+};
+
+
 // Begin testing
 
 describe("The GetStringColors factory function (default export)", function () {
@@ -49,35 +82,12 @@ describe("The GetStringColors factory function (default export)", function () {
 });
 
 describe("Module private functions", function () {
-    describe("Filtering image results", function () {
+    describe("filterResultsByImageType", function () {
         var private_function = null;
         var data = null;
         beforeEach(function() {
             private_function = GetStringColors.__get__("filterResultsByImageType");
-            data = [{
-                "url": "http://foo.bar/baz.jpg",
-                "type": "image/jpeg",
-                "width": 1024,
-                "height": 768,
-                "size": 102451,
-                "thumbnail": {
-                    "url": "http://foo.bar/thumbnail.jpg",
-                    "width": 512,
-                    "height": 512
-                }
-            },
-            {
-                "url": "http://green.eggs/ham.jpg",
-                "type": "image/png",
-                "width": 1024,
-                "height": 768,
-                "size": 102451,
-                "thumbnail": {
-                    "url": "http://green.eggs/thumbnail.jpg",
-                    "width": 512,
-                    "height": 512
-                }
-            }];
+            data = testData.imageSearchResults;
         });
         it("should work for valid string types", function () {
             var filtered = private_function(data, "image/jpeg");
@@ -91,7 +101,28 @@ describe("Module private functions", function () {
             expect(filtered).to.be.empty;
         });
     });
-    describe("Reuesting an image search", function () {
+    describe("processResultsToUrl", function () {
+        var private_function = null;
+        var data = null;
+        beforeEach(function() {
+            private_function = GetStringColors.__get__("processResultsToUrl");
+            data = testData.imageSearchResults;
+        });
+        it("should work for valid string types", function () {
+            var filtered = private_function(data, "image/jpeg");
+            expect(filtered).to.be.a("string");
+            expect(filtered).to.equal("http://foo.bar/baz.jpg");
+        });
+        it("if no results should throw error", function () {
+            expect(function () {
+                private_function(data, "holy/grail");
+            }).to.throw();
+        });
+    });
+});
+/*
+describe("Agnostic wrappers for external dependencies", function () {
+    describe("Requesting an image search", function () {
         var private_function = null;
         var stub = null;
         beforeEach(function() {
@@ -143,7 +174,7 @@ describe("Module private functions", function () {
             getStringColors = new GetStringColors(process.env.GOOGLE_CSE_ID, process.env.GOOGLE_API_KEY);
         });
         it("should return a chroma color object for a JPEG buffer", function () {
-            var buffer = fs.readFileSync(path.join(testDataDir, "orange_ff6600.jpg"));
+            var buffer = 
             var promise = getStringColors.getColorsFromJpgBuffer(buffer);
             return Promise.all([
                 expect(promise).to.eventually.be.an("array"),
@@ -181,3 +212,4 @@ describe("Module private functions", function () {
         });
     });
 });
+*/

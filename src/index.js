@@ -4,7 +4,14 @@ let got = require("got");
 
 let debug = require("debug")("get-string-colors");
 
-// Sync functions
+// Thrown if get-string-colors cannot work out a good answer
+function DataError(message){
+    this.name = "DataError";
+    this.message = message;
+}
+DataError.prototype = new Error();
+
+// Module functions
 let filterResultsByImageType = (results, type) => {
     debug("Filtering %d image results by type: %s", [results, type]);
     return results.filter(image => {
@@ -12,7 +19,18 @@ let filterResultsByImageType = (results, type) => {
     });
 };
 
-// Async functions (return promises)
+let processResultsToUrl = (results, type) => {
+    debug("Picking one %s image URL from %d results", [type, results.length]);
+    var filteredResults = filterResultsByImageType(results, type);
+    var imageUrl = filteredResults[0].url;
+    if (imageUrl === undefined) {
+        throw new DataError("No suitable images were found for this query");
+    }
+    return imageUrl;
+};
+
+
+// Async functions (return promises from external deps)
 let requestImageSearch = (googleImages, query, options={}) => {
     debug("Searching images for: %s", query);
     options = Object.assign({size: "medium"}, options);
@@ -35,8 +53,9 @@ let requestImageUrlAsBuffer = (url) => {
 
 let getColorsFromBuffer = (buffer, type) => {
     debug("Getting colors from buffer type: %s", type);
-    getColors(buffer, "image/jpeg");
+    getColors(buffer, type);
 };
+
 
 // Factory function: returns an async function (promised result)
 let GetStringColors = (googleCseId, googleApiKey) => {
@@ -47,10 +66,9 @@ let GetStringColors = (googleCseId, googleApiKey) => {
         debug("Getting string colors");
         return requestImageSearch(googleImages, query)
             .then(imageSearchResults => {
-                return filterResultsByImageType(imageSearchResults, type);
+                return processResultsToUrl(imageSearchResults, type);
             })
-            .then(filteredResults => {
-                let imageUrl = filteredResults[0].url;
+            .then(imageUrl => {
                 return requestImageUrlAsBuffer(imageUrl);
             })
             .then(buffer => {
