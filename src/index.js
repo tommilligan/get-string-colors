@@ -53,7 +53,7 @@ let requestImageUrlAsBuffer = (url) => {
 
 let getColorsFromBuffer = (buffer, type) => {
     debug("Getting colors from buffer type: %s", type);
-    getColors(buffer, type);
+    return getColors(buffer, type);
 };
 
 

@@ -69,7 +69,7 @@ describe("Using external resources", function () {
             private_function = GetStringColors.__get__("getColorsFromBuffer");
         });
         it("should return list of 5 chromajs colors", function () {
-            const promise = private_function(testData.imageBufferJpeg, "image/jpeg");
+            var promise = private_function(testData.imageBufferJpeg, "image/jpeg");
             return Promise.all([
                 expect(promise).to.eventually.be.an("array"),
                 expect(promise).to.eventually.have.lengthOf(5)
@@ -80,6 +80,7 @@ describe("Using external resources", function () {
 
 describe("Live end-to-end test", function () {
     it("should succeed with good query", function () {
+        this.timeout(5000);
         const promise = testData.getStringColors("heart");
         return Promise.all([
             expect(promise).to.eventually.be.an("array"),
@@ -87,6 +88,7 @@ describe("Live end-to-end test", function () {
         ]);
     });
     it("should error with bad query", function () {
+        this.timeout(5000);
         return expect(testData.getStringColors("I2yXOkaDg6GqVGIbiN32dPo8apht7ZyABFdpNzJbxSTWQq6YGwbtdpso4zMhiss2")).to.be.rejected;
     });
 });
